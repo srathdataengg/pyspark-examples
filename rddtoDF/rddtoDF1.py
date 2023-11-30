@@ -1,5 +1,7 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StringType, StructField
+from pyspark.sql.functions import struct, col
+from pyspark.sql.types import StructType, StringType, StructField, IntegerType
+from pyspark.sql.functions import col, struct, when
 
 spark = SparkSession.builder.appName("Convert RDD to DF").getOrCreate()
 dept = [("Finance", 10), ("Marketing", 20), ("Sales", 30), ("IT", 40)]
@@ -54,3 +56,14 @@ StructureSchema = StructType([
 df2 = spark.createDataFrame(data=structureData, schema=StructureSchema)
 df2.printSchema()
 df2.show(truncate=False)
+
+updatedDF = df2.withColumn("Otherinfo",
+                           struct(col("id").alias("identifier"),
+                                  col("gender").alias("gender"),
+                                  col("salary").alias("salary"),
+                                  when(col("salary").cast(IntegerType()) < 2000, "Low")
+                                  .when(col("salary").cast(IntegerType)) < 4000, "Medium")
+                           .otherwise("High").alias("Salary_Grade")
+                           ).drop("id", "gender", "salary")
+updatedDF.printSchema()
+updatedDF.show(truncate=False)
