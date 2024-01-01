@@ -30,3 +30,8 @@ sample_df.sort(col("salary").desc(),col("bonus").desc()).show()
 sample_df.sort("department","state").show()
 
 sample_df.orderBy(col("department").desc(),col("state").desc()).show()
+
+# Using Raw SQL
+
+sample_df.createOrReplaceTempView("EMP")
+spark.sql("select employeename,department,state,salary,age,bonus from EMP order by department desc").show(truncate=False)
